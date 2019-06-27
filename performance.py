@@ -4,21 +4,25 @@
 Created on Tue Jun 18 09:50:14 2019
 
 @author: james
+
+plots confusion matrices and ROC curves for one or more models
 """
 from sklearn.metrics import classification_report, confusion_matrix
 import numpy as np
 from sklearn.metrics import roc_curve
+
 from sklearn.metrics import auc
 import matplotlib.pyplot as plt
 
 plt.close("all")
  
+#name models
 model_name1 = 'resnet_aug_test'
 model_name2 = 'resnet_test'
 model_name3 = 'mobilenet_test'
 
 
-#https://github.com/scikit-learn/scikit-learn/blob/master/examples/model_selection/plot_confusion_matrix.py
+# adapted from https://github.com/scikit-learn/scikit-learn/blob/master/examples/model_selection/plot_confusion_matrix.py
 
 def plot_confusion_matrix(y_true, y_pred, classes,
                           normalize=False,
@@ -76,6 +80,7 @@ def plot_confusion_matrix(y_true, y_pred, classes,
     fig.tight_layout()
     return ax
 
+#load predictions and groundtruths
 y_pred1 = np.loadtxt('../performance/y_pred_'+model_name1+'.txt')
 y_gt1 = np.loadtxt('../performance/y_gt_'+model_name1+'.txt')
 
@@ -85,12 +90,14 @@ y_gt2 = np.loadtxt('../performance/y_gt_'+model_name2+'.txt')
 y_pred3 = np.loadtxt('../performance/y_pred_'+model_name3+'.txt')
 y_gt3 = np.loadtxt('../performance/y_gt_'+model_name3+'.txt')
 
+#binarize predictions
 y_pred_bin1 = np.rint(y_pred1)
 y_pred_bin2 = np.rint(y_pred2)
 y_pred_bin3 = np.rint(y_pred3)
 
+#plot confusion matrices
 plot_confusion_matrix(y_gt1, y_pred_bin1, classes=["Mel","Other"], normalize = True,
-                      title='ResNet50')
+                      title='ResNet50_Aug')
 
 plot_confusion_matrix(y_gt2, y_pred_bin2, classes=["Mel","Other"], normalize = True,
                       title='ResNet50')
@@ -98,25 +105,28 @@ plot_confusion_matrix(y_gt2, y_pred_bin2, classes=["Mel","Other"], normalize = T
 plot_confusion_matrix(y_gt3, y_pred_bin3, classes=["Mel","Other"], normalize = True,
                       title='MobileNetV2')
 
+#get metrics for ROC curves
 fpr1, tpr1, thresholds1 = roc_curve(y_gt1, y_pred1)
 fpr2, tpr2, thresholds2 = roc_curve(y_gt2, y_pred2)
 fpr3, tpr3, thresholds3 = roc_curve(y_gt3, y_pred3)
 
+#option for true negative rate
 tnr1 = 1-fpr1
 tnr2 = 1-fpr2
 tnr3 = 1-fpr3
 
+#get area under curve
 auc1 = auc(fpr1, tpr1)
 auc2 = auc(fpr2, tpr2)
 auc3 = auc(fpr3, tpr3)
 
 plt.figure()
 #plt.plot([0, 1], [0, 1], 'k--')
-plt.plot(tnr1, tpr1, label='ResNet50 (AUC = {:.3f})'.format(auc1))
+plt.plot(tpr1, tnr1, label='ResNet50_Aug (AUC = {:.3f})'.format(auc1))
 plt.plot(tnr2, tpr2, label='ResNet50 (AUC = {:.3f})'.format(auc2))
 plt.plot(tnr3, tpr3, label='MobileNetV2 (AUC = {:.3f})'.format(auc3))
-plt.xlabel('True negative rate (specificity)', fontsize = 20)
-plt.ylabel('True positive rate (sensitivity)', fontsize = 20)
+plt.xlabel('True positive rate (sensitivity)', fontsize = 20)
+plt.ylabel('True negative rate (specificity)', fontsize = 20)
 plt.title('ROC curve', fontsize = 20)
 plt.legend(loc='best')
 plt.legend(fontsize = 18)
@@ -127,18 +137,20 @@ plt.show()
 
 plt.figure()
 #plt.plot([0, 1], [0, 1], 'k--')
-plt.plot(tnr1, tpr1, label='ResNet50 (AUC = {:.3f})'.format(auc1))
+plt.plot(tpr1, tnr1, label='ResNet50_Aug (AUC = {:.3f})'.format(auc1))
 plt.plot(tnr2, tpr2, label='ResNet50 (AUC = {:.3f})'.format(auc2))
 plt.plot(tnr3, tpr3, label='MobileNetV2 (AUC = {:.3f})'.format(auc3))
-plt.xlabel('True negative rate (specificity)', fontsize = 20)
-plt.ylabel('True positive rate (sensitivity)', fontsize = 20)
+plt.xlabel('True negative rate (sensitivity)', fontsize = 20)
+plt.ylabel('True positive rate (specificity)', fontsize = 20)
 plt.title('ROC curve', fontsize = 20)
 plt.legend(loc='best')
 plt.legend(fontsize = 18)
-plt.ylim((0.9,1))
+plt.ylim((0,1))
+plt.xlim((.9,1))
 plt.xticks(fontsize = 16)
 plt.yticks(fontsize = 16)
 plt.show()
+
 
 
 
