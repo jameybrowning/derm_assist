@@ -1,18 +1,18 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 '''
-trains DermAssistAI model from pretrained ResNet30 with imagenet weights
+trains DermAssistAI model from pretrained ResNet50 with imagenet weights
 
 '''
 
-
-import PIL
 from keras.applications.resnet50 import ResNet50
 from keras.applications.mobilenetv2 import MobileNetV2
 from keras import layers
+
 from keras import models
 from keras import callbacks
 from keras import optimizers
+
 from keras.preprocessing.image import ImageDataGenerator
 
 image_size = 224
@@ -32,17 +32,6 @@ x = layers.Dense(256, activation = 'relu')(x)
 y = layers.Dense(1, activation='sigmoid')(x)
 model = models.Model(inputs = base_model.input, outputs = y)
  
-
-#model = models.load_model('networks/derm_assist_checkpoint_resnet_aug.h5')
-
-
-#model.compile(loss = 'binary_crossentropy',
-#              optimizer = optimizers.RMSprop(lr=1e-4),
-#              metrics = ['acc'])
-
-#Use ImageDataGenerator to preprocess images
-
-
 train_datagen = ImageDataGenerator(
     rescale=1./255,
     rotation_range=30,
@@ -82,6 +71,7 @@ callbacks_list = [callbacks.ModelCheckpoint(
         save_best_only = True),
 callbacks.CSVLogger('log_resnet_focal.csv', append=True, separator=';')]       
 
+'''
 import keras.backend as K
 
 def custom_loss(epsilon, gamma):
@@ -97,9 +87,9 @@ def custom_loss(epsilon, gamma):
     
     return loss
 
-#model.compile(optimizer= optimizers.RMSprop(lr=1e-4), 
-#              loss=custom_loss(epsilon, gamma), metrics = ['acc'])
-
+model.compile(optimizer= optimizers.RMSprop(lr=1e-4), 
+              loss=custom_loss(epsilon, gamma), metrics = ['acc'])
+'''
 model.compile(loss = 'binary_crossentropy',
               optimizer = optimizers.RMSprop(lr=1e-4),
               metrics = ['acc'])
